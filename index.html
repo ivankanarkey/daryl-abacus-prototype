@@ -289,6 +289,43 @@
   // --- Navigation state: stack of boards drilled into ---
   let stack = [root];
 
+  // --- Router: each drill level gets a real, shareable, bookmarkable URL ---
+  // Path = chain of bead ids, e.g. #/t1/ins/tft
+  function resolveStackFromHash() {
+    const hash = location.hash.replace(/^#\/?/, "");
+    const parts = hash ? hash.split("/").filter(Boolean) : [];
+    let cur = root;
+    const newStack = [root];
+    for (const part of parts) {
+      const bead = cur.beads.find(b => b.id === part && b.child);
+      if (!bead) break;
+      cur = bead.child;
+      newStack.push(cur);
+    }
+    return newStack;
+  }
+
+  function pathForStack(s) {
+    const parts = [];
+    for (let i = 0; i < s.length - 1; i++) {
+      const bead = s[i].beads.find(b => b.child === s[i + 1]);
+      if (bead) parts.push(bead.id);
+    }
+    return parts.join("/");
+  }
+
+  function navigateTo(newStack) {
+    stack = newStack;
+    const path = pathForStack(stack);
+    history.pushState(null, "", path ? `#/${path}` : "#/");
+    render();
+  }
+
+  window.addEventListener("popstate", () => {
+    stack = resolveStackFromHash();
+    render();
+  });
+
   function statusClass(pos) {
     if (pos <= 0) return "notstarted";
     if (pos >= 100) return "done";
@@ -305,8 +342,7 @@
     el.querySelectorAll(".crumb").forEach(btn => {
       btn.addEventListener("click", () => {
         const idx = Number(btn.dataset.idx);
-        stack = stack.slice(0, idx + 1);
-        render();
+        navigateTo(stack.slice(0, idx + 1));
       });
     });
   }
@@ -357,8 +393,7 @@
       const openBtn = container.querySelector(`.open-btn[data-bead="${b.id}"]`);
       if (openBtn) {
         openBtn.addEventListener("click", () => {
-          stack.push(b.child);
-          render();
+          navigateTo([...stack, b.child]);
         });
       }
     });
@@ -400,5 +435,6 @@
     renderBoard();
   }
 
+  stack = resolveStackFromHash();
   render();
 </script>
