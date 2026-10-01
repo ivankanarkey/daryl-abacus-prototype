@@ -319,16 +319,15 @@
     const nav = document.getElementById("nav");
     nav.hidden = stack.length === 1;
     const back = stack.length > 1 ? `<button class="back-btn" id="backBtn">Back</button>` : "";
-    const crumbs = stack.map((b, i) => {
-      const isLast = i === stack.length - 1;
-      return (i > 0 ? `<span class="crumb-sep">›</span>` : "") +
-        `<button class="crumb ${isLast ? "current" : ""}" data-idx="${i}">${b.title}</button>`;
-    }).join("");
+    const crumbs = stack.slice(0, -1).map((b, i) =>
+      (i > 0 ? `<span class="crumb-sep">›</span>` : "") +
+      `<button class="crumb" data-idx="${i}">${b.title}</button>`
+    ).join("");
     nav.innerHTML = back + crumbs;
 
     const backBtn = document.getElementById("backBtn");
     if (backBtn) backBtn.addEventListener("click", () => navigateTo(stack.slice(0, -1)));
-    nav.querySelectorAll(".crumb:not(.current)").forEach(btn => {
+    nav.querySelectorAll(".crumb").forEach(btn => {
       btn.addEventListener("click", () => navigateTo(stack.slice(0, Number(btn.dataset.idx) + 1)));
     });
   }
