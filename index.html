@@ -1,0 +1,404 @@
+<title>The Abacus</title>
+<style>
+  :root {
+    --frame-dark: #1b120c;
+    --frame-wood: #3d2a1c;
+    --frame-wood-lt: #4a3423;
+    --rod-shadow: #120b07;
+    --brass: #c9973f;
+    --brass-bright: #f0c876;
+    --brass-dim: #8a692c;
+    --ink: #ece2d0;
+    --ink-dim: #b8a68c;
+    --ember: #d1603c;
+    --ember-bright: #ff8c5e;
+    --moss: #7fa06a;
+    --slate: #7c8ba3;
+    --done: #7fa06a;
+    --progress: #c9973f;
+    --notstarted: #5a4a38;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--frame-dark);
+    background-image:
+      radial-gradient(ellipse at 20% -10%, #2a1c12 0%, transparent 55%),
+      repeating-linear-gradient(90deg, #00000000 0px, #00000012 2px, #00000000 4px);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    padding: 2.5rem 1.5rem 4rem;
+    min-height: 100vh;
+  }
+
+  .display-font { font-family: Charter, Georgia, "Iowan Old Style", serif; }
+  .data-font { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+
+  header.page-head {
+    max-width: 920px;
+    margin: 0 auto 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  h1 {
+    font-family: Charter, Georgia, serif;
+    font-size: clamp(1.8rem, 3vw, 2.4rem);
+    margin: 0;
+    text-wrap: balance;
+    color: var(--brass-bright);
+    letter-spacing: 0.01em;
+  }
+
+  .subtitle {
+    color: var(--ink-dim);
+    font-size: 0.95rem;
+    max-width: 62ch;
+    line-height: 1.5;
+  }
+
+  /* Breadcrumb */
+  .crumbs {
+    max-width: 920px;
+    margin: 0 auto 1.5rem;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+  }
+  .crumb {
+    background: none;
+    border: 1px solid var(--brass-dim);
+    color: var(--ink-dim);
+    border-radius: 4px;
+    padding: 0.3rem 0.65rem;
+    cursor: pointer;
+    font-size: 0.82rem;
+  }
+  .crumb:hover { border-color: var(--brass); color: var(--ink); }
+  .crumb.current { color: var(--brass-bright); border-color: var(--brass); cursor: default; }
+  .crumb-sep { color: var(--brass-dim); }
+
+  /* Board */
+  .board {
+    max-width: 920px;
+    margin: 0 auto 2rem;
+  }
+
+  .frame {
+    background: linear-gradient(180deg, var(--frame-wood-lt), var(--frame-wood));
+    border: 1px solid var(--rod-shadow);
+    border-radius: 6px;
+    padding: 1.2rem 1.4rem 1.4rem;
+    box-shadow: 0 8px 24px -12px #00000090, inset 0 1px 0 #ffffff0f;
+    margin-bottom: 1.3rem;
+  }
+
+  .frame-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--rod-shadow);
+  }
+
+  .frame-name {
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+  }
+
+  .frame-sub { font-size: 0.75rem; color: var(--ink-dim); }
+
+  /* Row = one bead on a wire */
+  .row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+    padding: 0.9rem 0 0.3rem;
+  }
+
+  .row-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+  }
+
+  .bead-name {
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .drill-hint {
+    font-size: 0.68rem;
+    color: var(--brass-dim);
+  }
+
+  .open-btn {
+    font-size: 0.72rem;
+    color: var(--brass-bright);
+    background: none;
+    border: 1px solid var(--brass-dim);
+    border-radius: 4px;
+    padding: 0.2rem 0.55rem;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .open-btn:hover { border-color: var(--brass-bright); }
+
+  /* Wire / track */
+  .wire-row { position: relative; padding: 18px 10px 20px; }
+  .wire {
+    position: relative;
+    height: 4px;
+    background: linear-gradient(90deg, var(--notstarted), var(--brass-dim));
+    border-radius: 999px;
+    margin: 0 15px;
+    cursor: pointer;
+  }
+  .wire-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    margin-top: 6px;
+    padding: 0 2px;
+  }
+
+  .bead {
+    position: absolute;
+    top: 50%;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: left 0.3s cubic-bezier(.34,1.4,.4,1);
+    box-shadow: 0 2px 6px #00000080, inset 0 1px 2px #ffffff40, inset 0 -3px 4px #00000050;
+    cursor: grab;
+    z-index: 2;
+  }
+  .bead:active { cursor: grabbing; }
+  .bead.notstarted { background: radial-gradient(circle at 35% 30%, #7a6a54, var(--notstarted)); }
+  .bead.progress   { background: radial-gradient(circle at 35% 30%, var(--brass-bright), var(--progress)); }
+  .bead.done       { background: radial-gradient(circle at 35% 30%, #a3cf8d, var(--done)); }
+
+  .bead.at-done { animation: chime 0.5s ease-out; }
+  @keyframes chime {
+    0% { box-shadow: 0 0 0 0 #f0c87699, 0 2px 6px #00000080; }
+    60% { box-shadow: 0 0 0 12px #f0c87600, 0 2px 6px #00000080; }
+    100% { box-shadow: 0 2px 6px #00000080, inset 0 1px 2px #ffffff40, inset 0 -3px 4px #00000050; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bead { transition: none; }
+    .bead.at-done { animation: none; }
+  }
+
+  .placeholder-note {
+    font-size: 0.8rem;
+    color: var(--ink-dim);
+    font-style: italic;
+    padding: 0.4rem 0;
+  }
+
+  footer.note {
+    max-width: 920px;
+    margin: 2rem auto 0;
+    font-size: 0.78rem;
+    color: var(--ink-dim);
+    line-height: 1.6;
+    border-top: 1px solid var(--rod-shadow);
+    padding-top: 1rem;
+  }
+</style>
+
+<header class="page-head">
+  <h1 class="display-font">The Abacus</h1>
+  <p class="subtitle">Themes → Beads, every level the same wire. Drag or click a wire to slide its bead from not-started to done. Click "open" on a bead to drill into what's underneath it.</p>
+</header>
+
+<div class="crumbs" id="crumbs"></div>
+<div class="board" id="board"></div>
+
+<footer class="note">
+  Prototype — Theme 1 (Compliance &amp; Regulatory) and the Insurances drill-down use Daryl's real structure from WhatsApp (2026-09-24). Themes 2–6 are his first-stab names only, no beads yet. Not connected to live data.
+</footer>
+
+<script>
+  // --- Data model ---
+  // Each level is a "board": a list of beads on wires. A bead can optionally
+  // drill into a child board (another list of beads).
+
+  const insuranceTypesTFT = {
+    title: "TFT — Insurance types",
+    sub: "One level down from the TFT company bead",
+    beads: [
+      { id: "pl", name: "Public Liability", pos: 90 },
+      { id: "pi", name: "Professional Indemnity", pos: 55 },
+      { id: "veh", name: "Vehicles", pos: 15 },
+      { id: "etc", name: "etc. (add as they come up)", pos: 0 },
+    ],
+  };
+
+  const insuranceCompanies = {
+    title: "Bead 2 — Insurances",
+    sub: "3 companies, each its own wire",
+    beads: [
+      { id: "km", name: "Killin Management (KM)", pos: 80 },
+      { id: "nccs", name: "Native Conifer Carbon Sink (NCCS)", pos: 45 },
+      { id: "tft", name: "Tropical Fire Technologies (TFT)", pos: 55, child: insuranceTypesTFT },
+    ],
+  };
+
+  const theme1 = {
+    title: "Theme 1 — Compliance & Regulatory",
+    sub: "His first-stab beads, incl. NCCS Board Meetings",
+    beads: [
+      { id: "cmi", name: "CMI Code of Conduct", pos: 30 },
+      { id: "ins", name: "Insurances", pos: 55, child: insuranceCompanies },
+      { id: "forestry", name: "Forestry Australia Membership", pos: 10 },
+      { id: "asic", name: "ASIC Company Docs", pos: 80 },
+      { id: "accred", name: "Other Accreditations", pos: 0 },
+    ],
+  };
+
+  const root = {
+    title: "Themes",
+    sub: "His first-stab Top 10 (6 named so far)",
+    beads: [
+      { id: "t1", name: "Compliance & Regulatory", pos: 35, child: theme1 },
+      { id: "t2", name: "Budgeting & Finance", pos: 0, placeholder: true },
+      { id: "t3", name: "Comms (internal) & Media (external)", pos: 0, placeholder: true },
+      { id: "t4", name: "NCCS SylvaNaut Project", pos: 0, placeholder: true },
+      { id: "t5", name: "TFT Savanna Fire Ops Projects", pos: 0, placeholder: true },
+      { id: "t6", name: "Partnerships / Alliances / Biz Dev / Growth / Funding", pos: 0, placeholder: true },
+    ],
+  };
+
+  // --- Navigation state: stack of boards drilled into ---
+  let stack = [root];
+
+  function statusClass(pos) {
+    if (pos <= 0) return "notstarted";
+    if (pos >= 100) return "done";
+    return "progress";
+  }
+
+  function renderCrumbs() {
+    const el = document.getElementById("crumbs");
+    el.innerHTML = stack.map((b, i) => {
+      const isLast = i === stack.length - 1;
+      return (i > 0 ? `<span class="crumb-sep">/</span>` : "") +
+        `<button class="crumb ${isLast ? "current" : ""}" data-idx="${i}">${b.title}</button>`;
+    }).join("");
+    el.querySelectorAll(".crumb").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const idx = Number(btn.dataset.idx);
+        stack = stack.slice(0, idx + 1);
+        render();
+      });
+    });
+  }
+
+  function renderBoard() {
+    const board = stack[stack.length - 1];
+    const container = document.getElementById("board");
+    container.innerHTML = `
+      <section class="frame">
+        <div class="frame-head">
+          <span class="frame-name display-font">${board.title}</span>
+          <span class="frame-sub">${board.sub}</span>
+        </div>
+        ${board.beads.map(rowHtml).join("")}
+      </section>
+    `;
+
+    board.beads.forEach(b => {
+      const wire = container.querySelector(`.wire[data-bead="${b.id}"]`);
+      positionBead(b, false);
+
+      wire.addEventListener("click", (e) => {
+        if (e.target.closest(".bead")) return;
+        const rect = wire.getBoundingClientRect();
+        const pct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+        b.pos = Math.round(pct);
+        positionBead(b, true);
+      });
+
+      const beadEl = container.querySelector(`.bead[data-bead="${b.id}"]`);
+      let dragging = false;
+      beadEl.addEventListener("pointerdown", (e) => {
+        dragging = true;
+        beadEl.setPointerCapture(e.pointerId);
+      });
+      beadEl.addEventListener("pointermove", (e) => {
+        if (!dragging) return;
+        const rect = wire.getBoundingClientRect();
+        const pct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+        b.pos = Math.round(pct);
+        positionBead(b, false);
+      });
+      beadEl.addEventListener("pointerup", (e) => {
+        dragging = false;
+        positionBead(b, true);
+      });
+
+      const openBtn = container.querySelector(`.open-btn[data-bead="${b.id}"]`);
+      if (openBtn) {
+        openBtn.addEventListener("click", () => {
+          stack.push(b.child);
+          render();
+        });
+      }
+    });
+  }
+
+  function rowHtml(b) {
+    return `
+      <div class="row">
+        <div class="row-top">
+          <span class="bead-name">${b.name}</span>
+          ${b.child ? `<button class="open-btn" data-bead="${b.id}">open ↓</button>` : ""}
+        </div>
+        ${b.placeholder ? `<div class="placeholder-note">no beads yet — themes-only stub</div>` : `
+        <div class="wire-row">
+          <div class="wire" data-bead="${b.id}">
+            <div class="bead ${statusClass(b.pos)} data-font" data-bead="${b.id}"></div>
+          </div>
+          <div class="wire-labels"><span>not started</span><span>done</span></div>
+        </div>
+        `}
+      </div>
+    `;
+  }
+
+  function positionBead(b, animate) {
+    const el = document.querySelector(`.bead[data-bead="${b.id}"]`);
+    if (!el) return;
+    el.style.left = `${b.pos}%`;
+    el.className = `bead ${statusClass(b.pos)} data-font`;
+    if (animate && b.pos >= 100) {
+      el.classList.remove("at-done");
+      void el.offsetWidth;
+      el.classList.add("at-done");
+    }
+  }
+
+  function render() {
+    renderCrumbs();
+    renderBoard();
+  }
+
+  render();
+</script>
