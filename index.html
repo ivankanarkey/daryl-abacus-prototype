@@ -232,26 +232,78 @@
     ],
   };
 
+  // Task beads: source 2026-10-01-abacus-themes-beads.html (dashboard, 25 Sep). All "no status" → not started.
   const theme1 = {
-    title: "Compliance & Regulatory",
+    title: "Compliance & Reporting",
     beads: [
       { id: "cmi", name: "CMI Code of Conduct", pos: 30 },
       { id: "ins", name: "Insurances", pos: 55, child: insuranceCompanies },
       { id: "forestry", name: "Forestry Australia Membership", pos: 10 },
       { id: "asic", name: "ASIC Company Docs", pos: 80 },
       { id: "accred", name: "Other Accreditations", pos: 0 },
+      { id: "aci-photos", name: "NCCS: ACI Code of Conduct — send photos", pos: 0 },
+      { id: "aci-app", name: "NCCS: ACI Code of Conduct — submit application", pos: 0 },
+      { id: "nccs-sms", name: "NCCS: review & approve SMS", pos: 0 },
+      { id: "km-sms", name: "KM: create SMS", pos: 0 },
+      { id: "tft-sms", name: "TFT: create SMS", pos: 0 },
+    ],
+  };
+
+  const theme2 = {
+    title: "Budgeting & Finance",
+    beads: [
+      { id: "km-tax", name: "KM: tax declaration — send access/invoices", pos: 0 },
+      { id: "km-pivotel", name: "KM: pay Pivotel, give Sara access", pos: 0 },
+      { id: "km-mitti", name: "KM: SafetyCulture Mitti billing — confirm payment method", pos: 0 },
+      { id: "tft-inv-batch", name: "TFT: invoice batch — 5 more needed", pos: 0 },
+      { id: "tft-inv-backlog", name: "TFT: clear invoicing backlog", pos: 0 },
+    ],
+  };
+
+  const theme3 = {
+    title: "Comms & Media",
+    beads: [
+      { id: "tft-ciehf", name: "TFT: CIEHF fire program context for Sara", pos: 0 },
+      { id: "km-library", name: "KM: Forestry Library — review new project", pos: 0 },
+    ],
+  };
+
+  const theme4 = {
+    title: "NCCS SylvaNaut Project",
+    beads: [
+      { id: "grant-tracker", name: "Grant-obligation tracker", pos: 0 },
+      { id: "dermot", name: "Follow up Dermot Duncan — FPC data licence", pos: 0 },
+    ],
+  };
+
+  const theme5 = {
+    title: "TFT Savanna Fire Ops",
+    beads: [
+      { id: "report-batch", name: "Report batch — 5 more needed", pos: 0 },
+      { id: "cost-benefit", name: "Decade-long fire-ops cost-benefit analysis", pos: 0 },
+      { id: "ops-backlog", name: "Ops task backlog (rake-hoes, leaf blowers)", pos: 0 },
+      { id: "clinton", name: "Contract Clinton", pos: 0 },
+      { id: "dan-w", name: "Contract Dan W", pos: 0 },
+    ],
+  };
+
+  const theme6 = {
+    title: "Partnerships / BizDev / Alliances",
+    beads: [
+      { id: "symposium", name: "Register Daryl — 7–9 Oct Symposium", pos: 0 },
+      { id: "zoho", name: "Zoho migration cancellation follow-up", pos: 0 },
     ],
   };
 
   const root = {
     title: "Themes",
     beads: [
-      { id: "t1", name: "Compliance & Regulatory", pos: 35, child: theme1 },
-      { id: "t2", name: "Budgeting & Finance", pos: 0, placeholder: true },
-      { id: "t3", name: "Comms (internal) & Media (external)", pos: 0, placeholder: true },
-      { id: "t4", name: "NCCS SylvaNaut Project", pos: 0, placeholder: true },
-      { id: "t5", name: "TFT Savanna Fire Ops Projects", pos: 0, placeholder: true },
-      { id: "t6", name: "Partnerships, Alliances, Biz Dev, Growth & Funding", pos: 0, placeholder: true },
+      { id: "t1", name: theme1.title, pos: 35, child: theme1 },
+      { id: "t2", name: theme2.title, pos: 0, child: theme2 },
+      { id: "t3", name: theme3.title, pos: 0, child: theme3 },
+      { id: "t4", name: theme4.title, pos: 0, child: theme4 },
+      { id: "t5", name: theme5.title, pos: 0, child: theme5 },
+      { id: "t6", name: theme6.title, pos: 0, child: theme6 },
     ],
   };
 
