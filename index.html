@@ -52,6 +52,7 @@
     gap: 8px;
     margin-bottom: 16px;
   }
+  .nav[hidden] { display: none; }
   .back-btn {
     min-height: 44px;
     padding: 0 18px;
@@ -316,6 +317,7 @@
   // --- Rendering ---
   function renderNav() {
     const nav = document.getElementById("nav");
+    nav.hidden = stack.length === 1;
     const back = stack.length > 1 ? `<button class="back-btn" id="backBtn">Back</button>` : "";
     const crumbs = stack.map((b, i) => {
       const isLast = i === stack.length - 1;
